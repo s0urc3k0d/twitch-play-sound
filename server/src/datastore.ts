@@ -1,6 +1,6 @@
 import * as jsonfile from 'jsonfile'
 import * as fs from 'fs'
-import * as uuid from 'uuid/v5'
+import { v4 as uuidv4 } from 'uuid'
 
 import config from './config'
 
@@ -18,7 +18,7 @@ const readSounds = (): Promise<Sound[]> => new Promise((resolve, reject) => {
 
 const setSounds = (
   data: Sound[]
-) => new Promise((resolve, reject) => {
+) => new Promise<void>((resolve, reject) => {
   jsonfile.writeFile(fileSongs, data, (err) => {
     if (err) reject(err)
     resolve()
@@ -71,7 +71,7 @@ export const addSound = async (
       const sounds = await readSounds()
       const newSound: Sound = {
         ...sound,
-        id: uuid(sound.command, config.uuidNameSpace)
+        id: uuidv4()
       }
       await setSounds([ ...sounds, newSound ])
 
@@ -83,7 +83,7 @@ export const addSound = async (
   }
   catch (err) {
     console.log(err)
-    throw new Error(err)
+    throw new Error(String(err))
   }
 }
 
@@ -122,7 +122,7 @@ export const updateSound = async (
   }
   catch (err) {
     console.log(err)
-    throw new Error(err)
+    throw new Error(String(err))
   }
 }
 
@@ -141,7 +141,7 @@ export const deleteSound = async (
   }
   catch (err) {
     console.log(err)
-    throw new Error(err)
+    throw new Error(String(err))
   }
 }
 

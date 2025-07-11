@@ -1,12 +1,7 @@
-import * as express from 'express'
+import express, { Request, Response } from 'express'
 import * as path from 'path'
+import cookieParser from 'cookie-parser'
 import { createServer } from 'http'
-
-import {
-  Request,
-  Response,
-  Application
-} from 'express'
 
 import EndPoints from './endpoints'
 import config from './config'
@@ -15,10 +10,12 @@ import config from './config'
 import twitchConnection from './twitch'
 import { initializeSocket } from './socket'
 
-const app: Application = express()
+const app = express()
 const server = createServer(app)
 
 app.use(express.json())
+app.use(cookieParser()) // Ajout du middleware cookie-parser
+
 app.use(express.static('../client/build'))
 
 app.use('/api', EndPoints)

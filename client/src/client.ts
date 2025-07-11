@@ -17,15 +17,38 @@ export const fetchSounds = (): Promise<Sound[]> => fetch(
   .then(checkResponse)
   .then((res) => res.json())
 
-export const checkAuth = (): Promise<boolean> => fetch(
-  '/api/twitch/auth',
+export const checkAuth = (): Promise<{ authenticated: boolean, user?: any }> => fetch(
+  '/api/auth/status',
   {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
   }
 )
   .then(checkResponse)
   .then((res) => res.json())
+
+export const logout = (): Promise<Response> => fetch(
+  '/api/auth/logout',
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
+  }
+)
+  .then(checkResponse)
+
+export const fetchUser = (): Promise<any> => fetch(
+  '/api/auth/status',
+  {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
+  }
+)
+  .then(checkResponse)
+  .then((res) => res.json())
+  .then((data) => data.user || null)
 
 export const addSound = (
   data: FormData
@@ -78,16 +101,6 @@ export const deleteSound = (id: string): Promise<Sound[]> => fetch(
   '/api/sounds/' + id,
   {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' }
-  }
-)
-  .then(checkResponse)
-  .then((res) => res.json())
-
-export const fetchUser = (): Promise<TwitchUser> => fetch(
-  '/api/twitch',
-  {
-    method: 'GET',
     headers: { 'Content-Type': 'application/json' }
   }
 )
@@ -148,15 +161,6 @@ export const addUser = (
   {
     method: 'POST',
     body: JSON.stringify(user),
-    headers: { 'Content-Type': 'application/json' }
-  }
-)
-  .then(checkResponse)
-
-export const logOut = (): Promise<Response> => fetch(
-  '/api/twitch/logout',
-  {
-    method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   }
 )

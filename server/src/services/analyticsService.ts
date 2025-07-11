@@ -36,7 +36,7 @@ export class AnalyticsService {
     }, {} as Record<string, number>)
 
     // Fill missing days with 0
-    const result = []
+    const result: Array<{ date: string; commands: number }> = []
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date()
       date.setDate(date.getDate() - i)
@@ -129,7 +129,7 @@ export class AnalyticsService {
     }, {} as Record<number, number>)
 
     // Fill all 24 hours
-    const result = []
+    const result: Array<{ hour: number; commands: number }> = []
     for (let hour = 0; hour < 24; hour++) {
       result.push({
         hour,

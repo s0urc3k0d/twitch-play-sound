@@ -6,6 +6,8 @@ import { Request, Response, Router } from 'express'
 // import { fetchUsers, addUser, deleteUser, updateUser } from './users'
 import { SoundService } from './services/soundService'
 import { UserService } from './services/userService'
+import { AuthService } from './services/authService'
+import { SessionService } from './services/sessionService'
 import { SoundRequest } from './types'
 
 import soundUpload from './soundupload'
@@ -117,34 +119,166 @@ router.put('/sounds/:id/standard', async (req: Request, res: Response) => {
   }
 })
 
-router.get('/twitch/auth', async (req: Request, res: Response) => {
-  const auth = await twitchConnection.isAuth()
-  return res.status(200).send(auth)
-})
-
-router.post('/twitch/logout', async (req: Request, res: Response) => {
-  const auth = await twitchConnection.disconnect()
-  return res.status(200).send(auth)
-})
-
-router.get('/twitch', (req: Request, res: Response) => {
+// TODO: AUTHENTICATION ENDPOINTS - OAuth2 à implémenter
+/*
+router.get('/auth/twitch', async (req: Request, res: Response) => {
   try {
-    const config = twitchConnection.getConfig()
-    return res.status(200).send(config)
-  }
-  catch (e) {
-    return res
-      .status(500)
-      .send(e)
+    const state = SessionService.generateSessionId()
+    const authUrl = AuthService.getAuthorizationUrl(state)
+    
+    // Stocker l'état temporairement pour la validation
+    req.session = req.session || {}
+    req.session.oauth_state = state
+    
+    res.redirect(authUrl)
+  } catch (e) {
+    console.error('Auth error:', e)
+    return res.status(500).json({ error: 'Failed to initiate authentication' })
   }
 })
+
+router.get('/auth/twitch/callback', async (req: Request, res: Response) => {
+  try {
+    const { code, state } = req.query
+    
+    if (!code || typeof code !== 'string') {
+      return res.status(400).json({ error: 'Authorization code is required' })
+    }
+
+    // Vérifier l'état pour prévenir les attaques CSRF
+    if (!req.session?.oauth_state || req.session.oauth_state !== state) {
+      return res.status(400).json({ error: 'Invalid state parameter' })
+    }
+
+    // Échanger le code contre un token
+    const tokenData = await AuthService.exchangeCodeForToken(code)
+    
+    // Récupérer les informations utilisateur
+    const user = await AuthService.getUserInfo(tokenData.access_token)
+    
+    // Créer une session
+    const sessionId = SessionService.generateSessionId()
+    const session = SessionService.createSession(sessionId, user, tokenData)
+    
+    // Configurer le cookie de session
+    res.cookie('session_id', sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: tokenData.expires_in * 1000,
+      sameSite: 'lax'
+    })
+    
+    // Nettoyer l'état temporaire
+    delete req.session.oauth_state
+    
+    // Rediriger vers l'application
+    res.redirect('/')
+  } catch (e) {
+    console.error('Callback error:', e)
+    return res.status(500).json({ error: 'Authentication failed' })
+  }
+})
+
+router.get('/auth/status', async (req: Request, res: Response) => {
+  try {
+    const sessionId = req.cookies.session_id
+    
+    if (!sessionId) {
+      return res.status(200).json({ authenticated: false })
+    }
+    
+    const session = SessionService.getSession(sessionId)
+    
+    if (!session || !SessionService.isSessionValid(sessionId)) {
+      // Session expirée, nettoyer le cookie
+      res.clearCookie('session_id')
+      return res.status(200).json({ authenticated: false })
+    }
+    
+    // Vérifier la validité du token auprès de Twitch
+    const isTokenValid = await AuthService.validateToken(session.accessToken)
+    
+    if (!isTokenValid) {
+      // Token invalide, nettoyer la session
+      SessionService.destroySession(sessionId)
+      res.clearCookie('session_id')
+      return res.status(200).json({ authenticated: false })
+    }
+    
+    return res.status(200).json({ 
+      authenticated: true,
+      user: {
+        id: session.user.id,
+        login: session.user.login,
+        display_name: session.user.display_name,
+        profile_image_url: session.user.profile_image_url
+      }
+    })
+  } catch (e) {
+    console.error('Status check error:', e)
+    return res.status(500).json({ error: 'Failed to check authentication status' })
+  }
+})
+
+router.post('/auth/logout', async (req: Request, res: Response) => {
+  try {
+    const sessionId = req.cookies.session_id
+    
+    if (sessionId) {
+      const session = SessionService.getSession(sessionId)
+      
+      if (session) {
+        // Révoquer le token auprès de Twitch
+        await AuthService.revokeToken(session.accessToken)
+        
+        // Détruire la session
+        SessionService.destroySession(sessionId)
+      }
+      
+      // Nettoyer le cookie
+      res.clearCookie('session_id')
+    }
+    
+    return res.status(200).json({ success: true })
+  } catch (e) {
+    console.error('Logout error:', e)
+    return res.status(500).json({ error: 'Failed to logout' })
+  }
+})
+*/
+
+// AUTHENTICATION ENDPOINTS - OAuth2 simplifié pour test
+router.get('/auth/twitch', async (req: Request, res: Response) => {
+  try {
+    // Version simplifiée pour test - redirection directe
+    // TODO: Implémenter OAuth2 complet avec AuthService
+    res.redirect('/?auth=test') // Redirection temporaire
+  } catch (e) {
+    console.error('Auth error:', e)
+    return res.status(500).json({ error: 'Failed to initiate authentication' })
+  }
+})
+
+// Route temporaire pour l'état d'authentification
+router.get('/auth/status', async (req: Request, res: Response) => {
+  // Pour l'instant, on retourne toujours non authentifié
+  // TODO: Implémenter la vraie vérification OAuth2
+  return res.status(200).json({ authenticated: false })
+})
+
+// Routes de compatibilité - anciennes méthodes d'authentification
 
 router.post('/twitch', async (req: Request, res: Response) => {
   try {
+    // Pour la compatibilité, on garde cette route mais on l'adapte
+    const { username, oauth, channels } = req.body
+    
+    // Créer une session temporaire basée sur les anciennes données
+    // Note: Ceci est pour la transition, idéalement tout devrait passer par OAuth2
     const config = await twitchConnection.updateConfig({
-      username: req.body.username,
-      oauth: req.body.oauth,
-      channels: req.body.channels
+      username,
+      oauth,
+      channels
     })
     return res.status(200).send(config)
   }

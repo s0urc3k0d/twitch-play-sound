@@ -1,5 +1,5 @@
 import React from 'react'
-import { ConnectionForm, ConnectedCard } from '.'
+import { OAuth2ConnectionForm } from '.'
 import StreamerLayout from './StreamerLayout'
 import { useAppContext } from '../../hooks'
 
@@ -20,7 +20,7 @@ import {
 } from '@mui/icons-material'
 
 export default () => {
-  const { user, auth, login, logout } = useAppContext()
+  const { auth } = useAppContext()
 
   return (
     <StreamerLayout 
@@ -57,20 +57,9 @@ export default () => {
           </Card>
         </Grid>
 
-        {/* Connection Form/Card */}
+        {/* OAuth2 Connection Form */}
         <Grid item xs={12}>
-          <Card sx={{ mt: 2, p: 2 }}>
-            <CardContent>
-              <Typography variant="h6" color="primary" gutterBottom>
-                {auth ? 'Connecté en tant que' : 'Autoriser l\'accès à Twitch'}
-              </Typography>
-              {!auth || !user ? (
-                <ConnectionForm onAuth={login} />
-              ) : (
-                <ConnectedCard user={user} onLogOut={logout} />
-              )}
-            </CardContent>
-          </Card>
+          <OAuth2ConnectionForm />
         </Grid>
       </Grid>
     </StreamerLayout>

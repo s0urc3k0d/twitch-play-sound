@@ -44,7 +44,12 @@ export const AppProvider = ({ children }: Props) => {
   }
 
   const checkAuth = () => client.checkAuth()
-    .then(setAuth)
+    .then(response => {
+      setAuth(response.authenticated)
+      if (response.user) {
+        setUser(response.user)
+      }
+    })
 
   const update = () => {
     client.fetchUser()
@@ -61,8 +66,11 @@ export const AppProvider = ({ children }: Props) => {
       })
   }
 
-  const logout = () => client.logOut()
-    .then(() => setUser(null))
+  const logout = () => client.logout()
+    .then(() => {
+      setUser(null)
+      setAuth(false)
+    })
 
   useEffect(update, [])
 

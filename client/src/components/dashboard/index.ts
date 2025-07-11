@@ -7,6 +7,7 @@ import SoundTable from './SoundTable'
 import IconHelper from './IconHelper'
 import ConnectionPage from './ConnectionPage'
 import ConnectionForm from './ConnectionForm'
+import OAuth2ConnectionForm from './OAuth2ConnectionForm'
 import ConnectedCard from './ConnectedCard'
 import NewSoundDialog from './dialogs/NewSoundDialog'
 import EditSoundDialog from './dialogs/EditSoundDialog'
@@ -26,6 +27,7 @@ export {
   IconHelper,
   ConnectionPage,
   ConnectionForm,
+  OAuth2ConnectionForm,
   ConnectedCard,
   EditSoundDialog,
   UserPage,

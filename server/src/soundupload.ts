@@ -1,4 +1,4 @@
-import * as multer from 'multer'
+import multer from 'multer'
 import { v5 as uuidv5 } from 'uuid'
 
 import config from './config'

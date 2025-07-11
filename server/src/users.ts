@@ -1,5 +1,5 @@
 import * as jsonfile from 'jsonfile'
-import * as uuid from 'uuid/v5'
+import { v4 as uuidv4 } from 'uuid'
 
 import config from './config'
 
@@ -16,7 +16,7 @@ const readUsers = (): Promise<User[]> => new Promise((resolve, reject) => {
 
 const setUsers = (
   data: User[]
-) => new Promise((resolve, reject) => {
+) => new Promise<void>((resolve, reject) => {
   jsonfile.writeFile(fileUsers, data, (err) => {
     if (err) reject(err)
     resolve()
@@ -58,7 +58,7 @@ export const addUser = async (
       const users = await readUsers()
       const newUser: User = {
         ...user,
-        id: uuid(user.username, config.uuidNameSpace)
+        id: uuidv4()
       }
       await setUsers([ ...users, newUser ])
 
@@ -70,7 +70,7 @@ export const addUser = async (
   }
   catch (err) {
     console.log(err)
-    throw new Error(err)
+    throw new Error(String(err))
   }
 }
 
@@ -88,7 +88,7 @@ export const deleteUser = async (
   }
   catch (err) {
     console.log(err)
-    throw new Error(err)
+    throw new Error(String(err))
   }
 }
 
@@ -107,8 +107,8 @@ export const updateUser = async (
     }
 
     const newUser: User = {
-      id: oldUser.id,
-      ...user
+      ...user,
+      id: oldUser.id
     }
 
     const updated = userList.map(l => l.id === newUser.id ? newUser : l)
@@ -118,7 +118,7 @@ export const updateUser = async (
   }
   catch (err) {
     console.log(err)
-    throw new Error(err)
+    throw new Error(String(err))
   }
 }
 

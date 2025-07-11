@@ -2,8 +2,8 @@ import express, { Request, Response } from 'express'
 import multer from 'multer'
 import path from 'path'
 import { z } from 'zod'
-import { SoundService } from './services/soundService'
-import { AnalyticsService } from './services/analyticsService'
+import { SoundService } from '../services/soundService'
+import { AnalyticsService } from '../services/analyticsService'
 
 const router = express.Router()
 
@@ -37,7 +37,7 @@ const upload = multer({
 })
 
 // Error handler middleware
-const asyncHandler = (fn: Function) => (req: Request, res: Response, next: Function) => {
+const asyncHandler = (fn: any) => (req: Request, res: Response, next: any) => {
   Promise.resolve(fn(req, res, next)).catch(next)
 }
 
