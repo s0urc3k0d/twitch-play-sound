@@ -1,5 +1,5 @@
 import * as multer from 'multer'
-import * as uuid from 'uuid/v5'
+import { v5 as uuidv5 } from 'uuid'
 
 import config from './config'
 
@@ -12,7 +12,7 @@ const soundStorage = multer.diskStorage({
   },
   filename: function (req: Request, file, cb) {
     const command = req.body.command
-    const filename = uuid(command, config.uuidNameSpace)
+    const filename = uuidv5(command, config.uuidNameSpace)
     switch (getFileExtension(file.originalname)) {
       case 'mp3':
         cb(null, `${filename}.mp3`)

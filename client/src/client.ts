@@ -161,3 +161,34 @@ export const logOut = (): Promise<Response> => fetch(
   }
 )
   .then(checkResponse)
+
+export const fetchAnalytics = (): Promise<any> => fetch(
+  '/api/analytics',
+  {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  }
+)
+  .then(res => {
+    if (!res.ok) {
+      throw Error(res.statusText)
+    }
+    return res.text() // Utilisons .text() d'abord pour gérer les erreurs HTML
+  })
+  .then(text => {
+    try {
+      return JSON.parse(text)
+    } catch (e) {
+      // Si ce n'est pas du JSON valide (par exemple du HTML), retournons des données par défaut
+      console.warn('L\'API analytics n\'est pas disponible, utilisation de données par défaut')
+      return {
+        totalSounds: 0,
+        totalUsers: 0,
+        totalPlays: 0,
+        dailyStats: [],
+        popularSounds: [],
+        activeUsers: [],
+        recentActivity: []
+      }
+    }
+  })

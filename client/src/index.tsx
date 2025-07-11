@@ -1,21 +1,13 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
-import { AppContainer } from 'react-hot-loader'
+import { createRoot } from 'react-dom/client'
 
 import App from './components/App'
 
-const mount = document.getElementById('mount')
-const render = () => {
-  if (!mount) {
-    console.error('No mountpoint found!')
-    return
-  }
+const mount = document.getElementById('root')
 
-  ReactDOM.render(<AppContainer><App /></AppContainer>, mount)
-}
-
-render()
-
-if (module.hot) {
-  module.hot.accept('./components/App', render)
+if (!mount) {
+  console.error('No mountpoint found!')
+} else {
+  const root = createRoot(mount)
+  root.render(<App />)
 }

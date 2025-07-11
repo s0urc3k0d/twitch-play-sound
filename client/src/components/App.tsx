@@ -1,28 +1,25 @@
-import React from 'react'
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom'
-import { hot } from 'react-hot-loader'
-import { CssBaseline, MuiThemeProvider } from '@material-ui/core'
-import { AppProvider } from '../hooks/useAppContext'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { CssBaseline, ThemeProvider } from '@mui/material'
+import { AppProvider } from '../hooks/useAppProvider'
 
 import theme from '../theme'
-import '../index.less'
 
 import { DashboardMain } from './dashboard'
 import { PlayerMain } from './player'
 
 const App = () => (
-  <MuiThemeProvider theme={theme}>
+  <ThemeProvider theme={theme}>
     <AppProvider>
       <CssBaseline />
       <BrowserRouter>
-        <Switch>
-          <Redirect from='/' to='/dashboard' exact />
-          <Route path='/dashboard/' component={() => <DashboardMain />} />
-          <Route path='/player/' component={() => <PlayerMain />} />
-        </Switch>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard/*" element={<DashboardMain />} />
+          <Route path="/player" element={<PlayerMain />} />
+        </Routes>
       </BrowserRouter>
     </AppProvider>
-  </MuiThemeProvider>
+  </ThemeProvider>
 )
 
-export default hot(module)(App)
+export default App

@@ -1,13 +1,13 @@
-import * as jsonfile from 'jsonfile'
+// import * as jsonfile from 'jsonfile'
 import { Client, ChatUserstate } from 'tmi.js'
 import { TwitchConfig } from './types'
 import config from './config'
 import { dispatchSocket } from './socket'
 import { SOCKET, PERMISSIONS } from './enum'
-import { fetchSounds } from './datastore'
-import { findUser } from './users'
+import { SoundService } from './services/soundService'
+import { UserService } from './services/userService'
 
-const fileConfig = './db/db-twitch.json'
+// const fileConfig = './db/db-twitch.json'
 
 class TwitchConnection {
   connected: boolean
@@ -26,19 +26,20 @@ class TwitchConnection {
   }
 
   readConfig = (): Promise<TwitchConfig> => new Promise((resolve, reject) => {
-    jsonfile.readFile(fileConfig, (err, cfg: TwitchConfig) => {
-      if (err) reject(err)
-      resolve(cfg)
-    })
+    // TODO: Implémenter avec Prisma ou configuration simple
+    const defaultConfig: TwitchConfig = {
+      channels: ['twitch'] as string[],
+      username: 'bot' as string,
+      oauth: null
+    }
+    resolve(defaultConfig)
   })
 
   setConfig = (
     data: TwitchConfig
-  ) => new Promise((resolve, reject) => {
-    jsonfile.writeFile(fileConfig, data, (err) => {
-      if (err) reject(err)
-      resolve()
-    })
+  ) => new Promise<void>((resolve, reject) => {
+    // TODO: Implémenter avec Prisma
+    resolve()
   })
 
   onStartConnect = async () => {
@@ -103,11 +104,11 @@ class TwitchConnection {
     message: string
   ) => {
     if (message.charAt(0) === '!') {
-      const sounds = await fetchSounds()
+      const sounds = await SoundService.getAllSounds()
       for (const sound of sounds) {
         if (message === sound.command) {
           const raw = user['badges-raw']
-          const isUser = await findUser(user.username)
+          const isUser = await UserService.getUserByUsername(user.username)
 
           if (isUser && isUser.flags.includes(PERMISSIONS.BANNED)) {
             return

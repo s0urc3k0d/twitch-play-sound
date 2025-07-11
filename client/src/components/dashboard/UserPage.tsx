@@ -1,30 +1,21 @@
 import React, { useState } from 'react'
-import { Layout, UserTable, NewUserDialog, EditUserDialog } from '.'
+import { UserTable, NewUserDialog, EditUserDialog } from '.'
+import StreamerLayout from './StreamerLayout'
 import { User } from '../../types'
-import { Plus } from 'mdi-material-ui'
 import { useUsers } from '../../hooks'
 
 import {
-  createStyles,
-  Theme,
-  makeStyles,
   Tooltip,
-  Fab
-} from '@material-ui/core'
+  Fab,
+  Box
+} from '@mui/material'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    action: {
-      position: 'fixed',
-      bottom: '0',
-      right: '0',
-      margin: theme.spacing(3.5)
-    }
-  })
-)
+import { 
+  People as PeopleIcon,
+  PersonAdd as PersonAddIcon 
+} from '@mui/icons-material'
 
 export default () => {
-  const classes = useStyles()
   const [ isNewDialogOpen, setIsNewDialogOpen ] = useState(false)
   const [ editableUser, setEditableUser ] = useState<null | User>(null)
   const {
@@ -36,25 +27,40 @@ export default () => {
   } = useUsers()
 
   return (
-    <>
-      <Layout title='Manage Users'>
+    <StreamerLayout 
+      title="Gestion des Utilisateurs" 
+      icon={<PeopleIcon />}
+      actions={
+        <Tooltip title="Ajouter un nouvel utilisateur">
+          <Fab
+            color="secondary"
+            onClick={() => setIsNewDialogOpen(true)}
+            sx={{
+              position: 'fixed',
+              bottom: 32,
+              right: 32,
+              background: 'linear-gradient(45deg, #00F5A0 30%, #00C875 90%)',
+              '&:hover': {
+                background: 'linear-gradient(45deg, #00C875 30%, #00A563 90%)',
+                boxShadow: '0 8px 32px rgba(0, 245, 160, 0.4)',
+                transform: 'scale(1.05)',
+              }
+            }}
+          >
+            <PersonAddIcon />
+          </Fab>
+        </Tooltip>
+      }
+    >
+      <Box sx={{ mb: 3 }}>
         <UserTable
           users={users}
           loading={loading}
           onDelete={deleteUser}
           onEdit={(user) => setEditableUser(user)}
         />
-      </Layout>
-      <div className={classes.action}>
-        <Tooltip title='Add new user'>
-          <Fab
-            color='secondary'
-            onClick={() => setIsNewDialogOpen(true)}
-          >
-            <Plus />
-          </Fab>
-        </Tooltip>
-      </div>
+      </Box>
+      
       <NewUserDialog
         isOpen={isNewDialogOpen}
         onClose={() => setIsNewDialogOpen(false)}
@@ -67,6 +73,6 @@ export default () => {
         onEdit={editUser}
         setUser={setEditableUser}
       />
-    </>
+    </StreamerLayout>
   )
 }

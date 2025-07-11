@@ -1,20 +1,17 @@
 import React from 'react'
 import { TwitchUser } from '../../types'
 import {
-  Typography as T,
-  makeStyles,
-  createStyles,
-  Theme,
-  Button
-} from '@material-ui/core'
+  Typography,
+  Button,
+  Box,
+  Avatar,
+  Chip
+} from '@mui/material'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    text: {
-      marginTop: theme.spacing(2)
-    }
-  })
-)
+import {
+  Person as PersonIcon,
+  ExitToApp as ExitToAppIcon
+} from '@mui/icons-material'
 
 interface Props {
   user: TwitchUser,
@@ -25,19 +22,40 @@ export default ({
   user,
   onLogOut
 }: Props) => {
-  const classes = useStyles()
-
   return (
-    <>
-      <T variant='h4'>{user.username}</T>
-      <Button
-        variant='contained'
-        color='secondary'
-        className={classes.text}
-        onClick={onLogOut}
+    <Box sx={{ textAlign: 'center', py: 2 }}>
+      <Avatar 
+        sx={{ 
+          width: 80, 
+          height: 80, 
+          mx: 'auto', 
+          mb: 2,
+          bgcolor: 'primary.main',
+          fontSize: '2rem'
+        }}
       >
-        Change user
+        <PersonIcon fontSize="large" />
+      </Avatar>
+      
+      <Typography variant="h4" gutterBottom color="primary">
+        {user.username}
+      </Typography>
+      
+      <Chip 
+        label="Connecté" 
+        color="success" 
+        sx={{ mb: 3, fontWeight: 600 }}
+      />
+      
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={onLogOut}
+        startIcon={<ExitToAppIcon />}
+        size="large"
+      >
+        Changer d'utilisateur
       </Button>
-    </>
+    </Box>
   )
 }

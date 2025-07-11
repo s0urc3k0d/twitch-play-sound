@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Sound {
+  id        String   @id @default(uuid())
+  name      String
+  command   String   @unique
+  path      String
+  level     Int      @default(75)
+  access    String   @default("ALL") // ALL, MOD, SUB, VIP
+  format    String   @default("MP3") // MP3, WAV, OGG, FLAC
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Analytics
+  playCount Int      @default(0)
+  lastPlayed DateTime?
+  
+  // Relations
+  playHistory SoundPlay[]
+  
+  @@map("sounds")
+}
+
+model User {
+  id       String   @id @default(uuid())
+  username String   @unique
+  flags    String   @default("[]") // JSON array stored as string
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Analytics
+  commandCount Int      @default(0)
+  lastSeen     DateTime?
+  
+  // Relations
+  playHistory SoundPlay[]
+  
+  @@map("users")
+}
+
+model SoundPlay {
+  id       String   @id @default(uuid())
+  soundId  String
+  userId   String?
+  username String   // Store username even if user is not registered
+  playedAt DateTime @default(now())
+  
+  // Relations
+  sound Sound @relation(fields: [soundId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@map("sound_plays")
+}
+
+model TwitchConfig {
+  id       String    @id @default("main")
+  username String?
+  oauth    String?
+  channels String    @default("[]") // JSON array stored as string
+  connected Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+  
+  @@map("twitch_config")
+}
+
+model Analytics {
+  id          String   @id @default(uuid())
+  date        DateTime @default(now())
+  totalSounds Int      @default(0)
+  totalUsers  Int      @default(0)
+  totalPlays  Int      @default(0)
+  
+  @@map("analytics")
+}

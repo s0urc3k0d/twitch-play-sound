@@ -1,37 +1,23 @@
 import React, { useState } from 'react'
-import { customColors } from '../../theme'
-import { Eye, EyeOff } from 'mdi-material-ui'
 import { TwitchUser } from '../../types'
 
 import {
-  createStyles,
-  Theme,
-  makeStyles,
   Button,
   TextField,
   FormControl,
   InputLabel,
-  Input,
+  OutlinedInput,
   InputAdornment,
   IconButton,
-  Typography as T
-} from '@material-ui/core'
+  Typography,
+  Box,
+  Link
+} from '@mui/material'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    text: {
-      marginTop: theme.spacing(2)
-    },
-    error: {
-      color: customColors.danger.main
-    },
-    link: {
-      textDecoration: 'none',
-      color: theme.palette.secondary.light,
-      fontWeight: 700
-    }
-  })
-)
+import {
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon
+} from '@mui/icons-material'
 
 interface Props {
   onAuth: (user: TwitchUser) => void
@@ -55,7 +41,6 @@ export default ({
   onAuth
 }: Props) => {
   const [state, setState] = useState<State>(getInitialState)
-  const classes = useStyles()
 
   const handleSubmit = () => {
     onAuth({
@@ -67,57 +52,76 @@ export default ({
   }
 
   return (
-    <>
+    <Box sx={{ '& > *': { mb: 2 } }}>
       <TextField
-        label='Twitch Username'
+        label="Nom d'utilisateur Twitch"
         value={state.username}
         onChange={e => setState({
           ...state,
           username: e.currentTarget.value
         })}
         fullWidth
+        variant="outlined"
         error={state.error}
-        className={classes.text}
       />
-      <FormControl className={classes.text} fullWidth>
-        <InputLabel htmlFor='adornment-oauth'>OAuth key</InputLabel>
-        <Input
-          id='adornment-oauth'
+      
+      <FormControl fullWidth variant="outlined">
+        <InputLabel htmlFor="adornment-oauth">Clé OAuth</InputLabel>
+        <OutlinedInput
+          id="adornment-oauth"
           type={state.showKey ? 'text' : 'password'}
           value={state.oauth}
-          fullWidth
           onChange={e => setState({
             ...state,
             oauth: e.currentTarget.value
           })}
           endAdornment={
-            <InputAdornment position='end'>
+            <InputAdornment position="end">
               <IconButton
-                aria-label='toggle password visibility'
+                aria-label="toggle password visibility"
                 onClick={() => setState({
                   ...state,
                   showKey: !state.showKey
                 })}
+                edge="end"
               >
-                {state.showKey ? <Eye /> : <EyeOff />}
+                {state.showKey ? <VisibilityOffIcon /> : <VisibilityIcon />}
               </IconButton>
             </InputAdornment>
           }
+          label="Clé OAuth"
         />
       </FormControl>
-      <T
-        variant='body2'
-      >Get OAauth key: <a href='https://twitchapps.com/tmi/' className={classes.link} target='_blank'>Here</a>
-      </T>
+      
+      <Typography variant="body2" color="text.secondary">
+        Obtenir la clé OAuth: {' '}
+        <Link 
+          href="https://twitchapps.com/tmi/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          sx={{ 
+            color: 'secondary.main',
+            fontWeight: 600,
+            textDecoration: 'none',
+            '&:hover': {
+              textDecoration: 'underline'
+            }
+          }}
+        >
+          Ici
+        </Link>
+      </Typography>
+      
       <Button
-        variant='contained'
-        color='secondary'
+        variant="contained"
+        color="secondary"
         disabled={state.username === '' || state.oauth === ''}
-        className={classes.text}
         onClick={handleSubmit}
+        size="large"
+        fullWidth
       >
-        Authenticate
+        S'authentifier
       </Button>
-    </>
+    </Box>
   )
 }
